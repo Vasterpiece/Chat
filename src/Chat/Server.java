@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Server {
     private static Map<String,Connection> connectionMap = new ConcurrentHashMap<String, Connection>();
 
-    public static void sendBroadcastMessage(Message message)
+    private static void sendBroadcastMessage(Message message)
     {
         for (Connection c:connectionMap.values()
              ) {
@@ -25,7 +25,7 @@ public class Server {
         }
     }
 
-    private void serverMainLoop(Connection connection, String userName) throws IOException, ClassNotFoundException {
+    private static void serverMainLoop(Connection connection, String userName) throws IOException, ClassNotFoundException {
         while (true) {
             Message message = connection.receive();
             if (message.getType() == MessageType.TEXT)
@@ -76,7 +76,20 @@ public class Server {
 
         @Override
         public void run() {
-            super.run();
+            System.out.println("Установлено соединение с удаленным адресом: " + this.socket.getRemoteSocketAddress());
+            String userName = "";
+            try (Connection connection = new Connection(socket);) {
+                userName = serverHandshake(connection);
+                sendBroadcastMessage(new Message(MessageType.USER_ADDED));
+                sendListOfUsers(connection, userName);
+                serverMainLoop(connection, userName);
+            } catch (Exception e) {
+                System.out.println("Произошла ошибка при обмене данными с удаленным адресом.");
+            }
+            if (!userName.isEmpty())
+                connectionMap.remove(userName);
+            sendBroadcastMessage(new Message(MessageType.USER_REMOVED));
+            System.out.println("Соединение с удаленным адресом закрыто: " + this.socket.getRemoteSocketAddress());
         }
     }
 
