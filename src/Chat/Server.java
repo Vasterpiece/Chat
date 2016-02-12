@@ -1,5 +1,6 @@
 package Chat;
 
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
@@ -16,7 +17,13 @@ public class Server {
     {
         for (Connection c:connectionMap.values()
              ) {
-            c.send(message);
+            try {
+                c.send(message);
+            }
+            catch (IOException e)
+            {
+                System.out.println("Не удалось отправить сообщение.");
+            }
         }
     }
 
