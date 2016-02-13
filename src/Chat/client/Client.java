@@ -60,8 +60,10 @@ public class Client {
                 Message message = connection.receive();
                 if (message.getType() == MessageType.TEXT)
                     processIncomingMessage(message.getData());
-                else if (message.getType() == MessageType.USER_ADDED)
+                else if (message.getType() == MessageType.USER_ADDED) {
+                    if (message.getData() != null)
                     informAboutAddingNewUser(message.getData());
+                }
                 else if (message.getType() == MessageType.USER_REMOVED)
                     informAboutDeletingNewUser(message.getData());
                 else
